@@ -1,0 +1,49 @@
+package edu.hanyang.submit;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.core.SimpleAnalyzer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.tartarus.snowball.ext.PorterStemmer;
+
+public class TinySETokenizer implements Tokenizer {
+
+	public void setup() {
+	}
+
+	public List<String> split(String text) {
+		List<String> result = new ArrayList<String>();
+		
+		SimpleAnalyzer analyzer = new SimpleAnalyzer();
+		TokenStream tokenstream = analyzer.tokenStream("", new StringReader(text));
+		
+		CharTermAttribute termAtt = tokenstream.getAttribute(CharTermAttribute.class);
+		OffsetAttribute offsetAtt = tokenstream.getAttribute(OffsetAttribute.class);
+		
+		PorterStemmer ps = new PorterStemmer();
+		
+		try{
+			tokenstream.reset();
+			while(tokenstream.incrementToken()){
+				String term = termAtt.toString();
+				ps.setCurrent(term);
+				ps.stem();
+				System.out.print("\""+ps.getCurrent()+"\" ");
+				result.add(ps.getCurrent());
+			}
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+		
+		return result;
+	}
+
+	public void clean() {
+	}
+
+}
